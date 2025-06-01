@@ -70,3 +70,40 @@ export const logout = async (req, res) => {
     res.status(500).json({ error: "Logout failed", details: error.message });
   }
 };
+
+export const updateUser = async (req, res) => {
+  const { skills = [], role, email } = req.body;
+
+  try {
+    if (req.user?.role !== "admin") {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ error: "User not fount" });
+    }
+
+    await User.updateOne(
+      { email },
+      { skills: skills.length ? skills : user.skills, role }
+    );
+
+    return res.json({ message: "User update successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Update failed", details: error.message });
+  }
+};
+
+export const getUser = async (req, res) => {
+  try {
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ error: "Forbiddden" });
+    }
+
+    const users = await user.find().select("-password");
+    return res.json({ users });
+  } catch (error) {
+    res.status(500).json({ error: "Get User failed", details: error.message });
+  }
+};
