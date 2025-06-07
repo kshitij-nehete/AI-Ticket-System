@@ -30,18 +30,18 @@ createRoot(document.getElementById("root")).render(
           }
         />
         <Route
-          path="/signup"
-          element={
-            <CheckAuth protected={false}>
-              <Signup />
-            </CheckAuth>
-          }
-        />
-        <Route
           path="/login"
           element={
             <CheckAuth protected={false}>
               <Login />
+            </CheckAuth>
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            <CheckAuth protected={false}>
+              <Signup />
             </CheckAuth>
           }
         />
