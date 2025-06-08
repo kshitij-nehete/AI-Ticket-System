@@ -9,6 +9,9 @@ export const createTicket = async (req, res) => {
         .status(400)
         .json({ message: "Title and desciption are required" });
     }
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
     const newTicket = await Ticket.create({
       title,
       description,
