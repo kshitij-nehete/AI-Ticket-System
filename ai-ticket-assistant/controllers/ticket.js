@@ -1,5 +1,4 @@
 import { inngest } from "../inngest/client.js";
-import ticket from "../models/ticket.js";
 import Ticket from "../models/ticket.js";
 
 export const createTicket = async (req, res) => {
@@ -10,7 +9,7 @@ export const createTicket = async (req, res) => {
         .status(400)
         .json({ message: "Title and desciption are required" });
     }
-    const newTicket = Ticket.create({
+    const newTicket = await Ticket.create({
       title,
       description,
       createdBy: req.user._id.toString(),
@@ -19,7 +18,7 @@ export const createTicket = async (req, res) => {
     await inngest.send({
       name: "title/created",
       data: {
-        ticketId: (await newTicket)._id.toString(),
+        ticketId: newTicket._id.toString(),
         title,
         description,
         createdBy: req.user._id.toString(),
@@ -43,9 +42,9 @@ export const getTickets = async (req, res) => {
         .populate("assignedTo", ["email", "_id"])
         .sort({ createdAt: -1 });
     } else {
-      tickets = await Ticket.find({ createdBy: user._id }).select(
-        "title description status createdAt".sort({ createdAt: -1 })
-      );
+      tickets = await Ticket.find({ createdBy: user._id })
+        .select("title description status createdAt")
+        .sort({ createdAt: -1 });
     }
     return res.status(200).json({ tickets });
   } catch (error) {

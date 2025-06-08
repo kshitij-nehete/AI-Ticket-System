@@ -5,9 +5,10 @@ import { inngest } from "../inngest/client.js";
 
 export const signUp = async (req, res) => {
   const { email, password, skills = [] } = req.body;
+  console.log("Signup request body:", req.body); // Log incoming data
 
   try {
-    const hashed = bcrypt.hash(password, 10);
+    const hashed = await bcrypt.hash(password, 10);
     const user = await User.create({ email, password: hashed, skills });
 
     //Fire inngest event
@@ -23,7 +24,7 @@ export const signUp = async (req, res) => {
       process.env.JWT_SECRET
     );
 
-    res.jsom({ user, token });
+    res.json({ user, token });
   } catch (error) {
     res.status(500).json({ error: "Signup failed", details: error.message });
   }
@@ -33,7 +34,7 @@ export const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = User.findOne({ email });
+    const user = await User.findOne({ email });
     if (!user) return res.status(401).json({ error: "User not found" });
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -46,11 +47,13 @@ export const login = async (req, res) => {
       process.env.JWT_SECRET
     );
 
-    res.jsom({ user, token });
+    res.json({ user, token });
   } catch (error) {
+    console.error("Login error:", error);
     res.status(500).json({ error: "Login failed", details: error.message });
   }
 };
+
 
 export const logout = async (req, res) => {
   try {
@@ -101,7 +104,7 @@ export const getUsers = async (req, res) => {
       return res.status(403).json({ error: "Forbiddden" });
     }
 
-    const users = await user.find().select("-password");
+    const users = await User.find().select("-password");
     return res.json({ users });
   } catch (error) {
     res.status(500).json({ error: "Get User failed", details: error.message });
